@@ -1,27 +1,56 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
-import { useFeatureFlag, useVisitorCode } from "@kameleoon/react-sdk";
+import {
+  useFeatureFlag,
+  useInitialize,
+  useVisitorCode,
+} from "@kameleoon/react-sdk";
 
 export default function Counter() {
   const [count, setCount] = useState(0);
+  const [isReady, setIsReady] = useState(false);
 
   const { getVisitorCode } = useVisitorCode();
 
-  const { isFeatureFlagActive } = useFeatureFlag();
+  const { getVariation, isFeatureFlagActive } = useFeatureFlag();
+
+  const { initialize } = useInitialize();
+
+  useEffect(() => {
+    const init = async () => {
+      await initialize();
+      setIsReady(true);
+    };
+
+    init();
+  }, [initialize]);
 
   const isEnabled = useMemo(() => {
+    if (!isReady) return;
+
     const visitorCode = getVisitorCode();
-    const isEnabled = isFeatureFlagActive({
-      visitorCode: visitorCode,
+
+    const isActive = isFeatureFlagActive({
+      visitorCode,
       featureKey: "enable_counter",
     });
 
-    return isEnabled;
-  }, [getVisitorCode, isFeatureFlagActive]);
+    console.log("is active", isActive);
+
+    const variation = getVariation({
+      visitorCode: visitorCode,
+      featureKey: "enable_counter",
+      track: false,
+    });
+
+    console.log(variation.key);
+
+    return variation.key === "on";
+  }, [getVisitorCode, getVariation, isFeatureFlagActive, isReady]);
 
   if (!isEnabled) {
-    return null;
+    return <div>Feature disabled</div>;
   }
 
   return (

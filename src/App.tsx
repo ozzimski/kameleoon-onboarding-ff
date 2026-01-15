@@ -15,8 +15,6 @@ const client = createClient({
   },
 });
 
-client.initialize();
-
 function App() {
   return (
     <KameleoonProvider client={client}>
