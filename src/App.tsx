@@ -11,9 +11,11 @@ const client = createClient({
   siteCode: "kph24vouhu",
   configuration: {
     updateInterval: 60,
-    environment: Environment.Production,
+    environment: Environment.Development,
   },
 });
+
+client.initialize();
 
 function App() {
   return (

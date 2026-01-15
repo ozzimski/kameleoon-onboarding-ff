@@ -1,9 +1,28 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
+import { useFeatureFlag, useVisitorCode } from "@kameleoon/react-sdk";
 
 export default function Counter() {
   const [count, setCount] = useState(0);
+
+  const { getVisitorCode } = useVisitorCode();
+
+  const { isFeatureFlagActive } = useFeatureFlag();
+
+  const isEnabled = useMemo(() => {
+    const visitorCode = getVisitorCode();
+    const isEnabled = isFeatureFlagActive({
+      visitorCode: visitorCode,
+      featureKey: "enable_counter",
+    });
+
+    return isEnabled;
+  }, [getVisitorCode, isFeatureFlagActive]);
+
+  if (!isEnabled) {
+    return null;
+  }
 
   return (
     <>
